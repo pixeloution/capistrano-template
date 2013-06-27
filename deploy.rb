@@ -42,13 +42,16 @@ set :branch, 'master'
 # to keep a git repo of the project on the remote and uses git to pull changes
 set :deploy_via, :remote_cache
 
+# after hook - this is what actually zaps old releases
+after "deploy:restart", "deploy:cleanup"
 
 namespace :deploy do
    # called by update_code after the basic deploy finishes. It assumes a Rails 
    # project was deployed so override. normally changes permissions, sets timestamps
    # via touch. not sure if I want to do anything here
    task :finalize_update, :except => { :no_release => true } do
-      # doing nothing
+      # runs Laravel 4's database migration 
+      run "php #{current_release}/artisan migrate"
    end
 
    task :migrate do
